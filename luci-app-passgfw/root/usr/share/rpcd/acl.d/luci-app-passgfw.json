@@ -1,0 +1,11 @@
+{
+	"luci-app-passgfw": {
+		"description": "Grant UCI access for luci-app-passgfw",
+		"read": {
+			"uci": [ "passgfw", "passgfw_server" ]
+		},
+		"write": {
+			"uci": [ "passgfw", "passgfw_server" ]
+		}
+	}
+}

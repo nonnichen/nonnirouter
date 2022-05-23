@@ -1,0 +1,35 @@
+#!/bin/sh
+
+uci -q batch <<-EOF >/dev/null
+	set dhcp.@dnsmasq[0].localuse=1
+	commit dhcp
+	delete ucitrack.@passgfw[-1]
+	add ucitrack passgfw
+	set ucitrack.@passgfw[-1].init=passgfw
+	commit ucitrack
+	delete firewall.passgfw
+	set firewall.passgfw=include
+	set firewall.passgfw.type=script
+	set firewall.passgfw.path=/var/etc/passgfw.include
+	set firewall.passgfw.reload=1
+	commit firewall
+	delete ucitrack.@passgfw_server[-1]
+	add ucitrack passgfw_server
+	set ucitrack.@passgfw_server[-1].init=passgfw_server
+	commit ucitrack
+	delete firewall.passgfw_server
+	set firewall.passgfw_server=include
+	set firewall.passgfw_server.type=script
+	set firewall.passgfw_server.path=/var/etc/passgfw_server.include
+	set firewall.passgfw_server.reload=1
+	commit firewall
+	set uhttpd.main.max_requests=50
+	commit uhttpd
+EOF
+
+[ ! -s "/etc/config/passgfw" ] && cp -f /usr/share/passgfw/0_default_config /etc/config/passgfw
+touch /etc/config/passgfw_show >/dev/null 2>&1
+rm -f /tmp/luci-indexcache
+rm -rf /tmp/luci-modulecache/
+killall -HUP rpcd 2>/dev/null
+exit 0
